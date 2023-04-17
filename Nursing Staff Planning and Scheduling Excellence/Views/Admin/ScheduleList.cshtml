@@ -1,0 +1,99 @@
+﻿@model NursingStaffPlanningandSchedulingExcellence.Models.UserVM
+@{
+    ViewBag.Title = "AllStaffList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var sno = 0;
+    DateTime chosenDay = ViewBag.chosenDate != null ? ViewBag.chosenDate : null;
+    var now = DateTime.Now.Date;
+}
+
+<div id="page-wrapper">
+    <div class="container-fluid">
+        <div class="row m-t-20">
+            @if (TempData["Message"] != null)
+            {
+                <div class="alert alert-success" style="float: right;" role="alert">
+                    <b>@TempData["Message"]</b>
+                </div>
+            }
+            @if (TempData["DeleteMessage"] != null)
+            {
+                <div class="alert alert-danger" style="float: right;" role="alert">
+                    <b>@TempData["DeleteMessage"]</b>
+                </div>
+            }
+            <div class="panel panel-info">
+                <div class="panel-heading "> Staff Schedule Maker </div>
+                <div class="white-box">
+                    <div class="table-responsive">
+                        @*<br /><br /><br />*@
+                        <table id="example" class="table  table-hover contact-list footable-loaded footable m-t-0" data-page-size="4">
+                            <thead>
+                                <tr class="text-dark">
+                                    <th scope="col">S.No</th>
+                                    <th scope="col">Full Name</th>
+                                    <th scope="col">Cell Phone</th>
+                                    <th scope="col">Email</th>
+                                    <th scope="col">Date Of Birth</th>
+                                    <th scope="col">Nurse Certification</th>
+                                    <th scope="col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.userList != null)
+                                {
+                                    foreach (var user in Model.userList)
+                                    {
+                                        sno = sno + 1;
+                                        <tr>
+
+                                            <td>@sno</td>
+                                            <td>@user.LastName, @user.FirstName</td>
+                                            <td>@user.CellPhone</td>
+                                            <td>@user.Email</td>
+                                            <td>@(user.DOB != null ? string.Format("{0:MMMM d , yyyy}", user.DOB) : "")</td>
+                                            @if (now < user.NurseCertification)
+                                            {
+                                                if (user.NurseCertification - now > now.AddMonths(1) - now)
+                                                {
+                                                    <td class="text-center" style="color:green">Good</td>
+                                                }
+                                                else
+                                                {
+                                                    <td class="text-center" style="color:orange">Expiring</td>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <td class="text-center" style="color:red">Expired</td>
+                                            }
+                                            <td>
+                                                <a class="fcbtn btn btn-info btn-outline btn-1f" href="~/Admin/ShiftSchedule/?userid=@user.UserId">Schedule </a>
+                                                @*<a class="fcbtn btn btn-info btn-outline btn-1f" href="~/Admin/ShiftSchedule/?userid=@user.UserId">Schedule Records</a>*@
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @*<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.2.0/css/bootstrap.min.css" rel="stylesheet">*@
+    <link href="https://cdn.datatables.net/1.13.3/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <script src="https://cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.3/js/dataTables.bootstrap5.min.js"></script>
+    @*<script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>*@
+        <script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/dataTables.material.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#example').DataTable({ "pageLength": 10 });
+        });
+    </script>
+}

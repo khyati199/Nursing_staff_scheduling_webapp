@@ -1,0 +1,67 @@
+﻿@model System.Web.Mvc.HandleErrorInfo
+
+@{
+    ViewBag.Title = "Error";
+}
+@{
+    Layout = null;
+}
+
+@*<script src="~/Scripts/jquery-1.11.1.js"></script>*@
+<script src="~/bootstrap/js/bootstrap.min.js"></script>
+<link href="~/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+<style>
+    .container-error {
+        text-align: center;
+        max-width: 1170px;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    .error {
+        color: red;
+        font-size: 49px;
+        font-family: arial;
+        text-transform: uppercase;
+        margin-bottom: 0px;
+    }
+
+    .error1 {
+        color: red;
+        font-size: 18px;
+        font-family: arial;
+        margin: 0;
+        font-weight: 300;
+        margin-bottom: 16px;
+        margin-top: 9px;
+    }
+
+    .error3 {
+        color: #000;
+        font-size: 24px;
+        font-family: arial;
+        margin: 0;
+        font-weight: 310;
+        margin-bottom: 16px;
+        margin-top: 18px;
+    }
+
+    .error-section {
+        box-shadow: 1px 2px 16px -1px rgba(0,0,0,0.25);
+        border-radius: 6px;
+        padding: 60px 0;
+        margin-top: 40px;
+    }
+</style>
+
+
+<div class="container-error">
+    <div class="error-section text-center">
+        <hgroup class="title">
+            <h1 class="error">Error.</h1>
+            <h2 class="error1">Oh, no! <i>SOMEONE</i> has made a terrible mistake and the page you requested cannot be found.</h2>
+            <img src="~/Images/404.jpg" alt="Requested page not found." width="900" />
+
+        </hgroup>
+    </div>
+</div>

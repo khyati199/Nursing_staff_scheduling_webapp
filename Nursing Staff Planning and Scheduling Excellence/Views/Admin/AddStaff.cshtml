@@ -1,0 +1,218 @@
+﻿@model NursingStaffPlanningandSchedulingExcellence.Models.UserVM
+@{
+    ViewBag.Title = "AddStaff";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div id="page-wrapper">
+    <div class="container-fluid">
+        @using (Html.BeginForm("AddStaff", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            @Html.HiddenFor(model => model.UserId)
+        <div class="row m-t-20">
+            @if (TempData["Message"] != null)
+            {
+                <div class="alert alert-success" style="float: right;" role="alert">
+                    <b>@TempData["Message"]</b>
+                </div>
+            }
+            @if (TempData["DeleteMessage"] != null)
+            {
+                <div class="alert alert-danger" style="float: right;" role="alert">
+                    <b>@TempData["DeleteMessage"]</b>
+                </div>
+            }
+            <div class="panel panel-info">
+                <div class="panel-heading ">Add Staff </div>
+                <div class="white-box">
+                    <form class="form-horizontal">
+                        <div class="row m-t-10">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="col-md-12"><span class="help">  First Name</span></label>
+                                    <div class="col-md-12">
+                                        @Html.EditorFor(model => model.FirstName, new { htmlAttributes = new { @class = "form-control", placeholder = "First Name" } })
+                                        @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="col-md-12"><span class="help">  Last Name</span></label>
+                                    <div class="col-md-12">
+                                        @Html.EditorFor(model => model.LastName, new { htmlAttributes = new { @class = "form-control", placeholder = "Last Name" } })
+                                        @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row m-t-10">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="col-md-12"><span class="help">  User Name</span></label>
+                                    <div class="col-md-12">
+                                        @Html.EditorFor(model => model.UserName, new { htmlAttributes = new { @class = "form-control", placeholder = "User Name" } })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="col-md-12"><span class="help">  Password</span></label>
+                                    <div class="col-md-12">
+                                        @Html.EditorFor(model => model.Password, new { htmlAttributes = new { @class = "form-control", placeholder = "Password" } })
+                                        @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row m-t-10">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="col-md-12"><span class="help"> Marital Status</span></label>
+                                    <div class="col-md-12">
+                                        @Html.DropDownListFor(model => model.MaritalStatusId, new SelectList(Model.maritalsList, "MaritalStatusId", "MaritalStatusName"), "Select Marital Status", new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.MaritalStatusId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="col-md-12"><span class="help"> Date of Birth</span></label>
+                                    <div class="col-md-12">
+                                        @Html.EditorFor(model => model.DOB, new { htmlAttributes = new { @class = "form-control", type = "date" } })
+                                        @Html.ValidationMessageFor(model => model.DOB, "", new { @class = "text-danger" })
+                                        @*@if (Model.DOB.HasValue && Model.DOB.Value <= DateTime.Today.AddYears(-18))
+                                    {
+                                        int age = DateTime.Today.Year - Model.DOB.Value.Year;
+                                        if (DateTime.Today < Model.DOB.Value.AddYears(age))
+                                        {
+                                            @:<p class="text-danger"> Your age is @age. Must be 18 and above.</p>
+                                        }
+
+                                    }
+                                    else if (Model.DOB.Value == null)
+                                    {
+                                        @:<p class="text-danger"></p>
+                                    }*@
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row m-t-10">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="col-md-12"><span class="help"> Gender</span></label>
+                                    <div class="col-md-12">
+
+                                        @Html.DropDownListFor(model => model.Sex, new SelectList(Model.gendersList, "GenderId", "GenderName"), "Select Gender", new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.Sex, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="col-md-12"><span class="help"> Address</span></label>
+                                    <div class="col-md-12">
+                                        @Html.EditorFor(model => model.Address, new { htmlAttributes = new { @class = "form-control", placeholder = "Address" } })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row m-t-10">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="col-md-12"><span class="help"> City</span></label>
+                                    <div class="col-md-12">
+                                        @Html.EditorFor(model => model.City, new { htmlAttributes = new { @class = "form-control", placeholder = "City" } })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="col-md-12"><span class="help"> State</span></label>
+                                    <div class="col-md-12">
+                                        @Html.EditorFor(model => model.Province, new { htmlAttributes = new { @class = "form-control", placeholder = "State" } })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row m-t-10">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="col-md-12"><span class="help"> Zip Code</span></label>
+                                    <div class="col-md-12">
+                                        @Html.EditorFor(model => model.ZipCode, new { htmlAttributes = new { @class = "form-control", placeholder = "Zip code" } })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="col-md-12"><span class="help"> Email Address</span></label>
+                                    <div class="col-md-12">
+                                        @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control", placeholder = "Email Address" } })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row m-t-10">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="col-sm-12">Cell Phone</label>
+                                    <div class="col-sm-12">
+                                        @Html.EditorFor(model => model.CellPhone, new { htmlAttributes = new { @class = "form-control", placeholder = "Cell Phone" } })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="col-sm-12">Nurse Certification Expiry Date</label>
+                                    <div class="col-sm-12">
+                                        @Html.EditorFor(model => model.NurseCertification, new { htmlAttributes = new { @class = "form-control", placeholder = "Expiry Date of Certification", type = "date" } })
+                                        @Html.ValidationMessageFor(model => model.NurseCertification, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2 col-sm-4 col-xs-12">
+                            <br /><br />
+                            <button type="submit" class="btn btn-block btn-info" onclick="Validate()">Submit</button> @*On submit*@
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+</div>
+@section Scripts{
+    <script type="text/javascript">
+        $(function Validate() {
+            $('#DOB').change(function () {
+                var dob = new Date($(this).val());
+                var today = new Date();
+                var age = today.getFullYear() - dob.getFullYear();
+                var monthDiff = today.getMonth() - dob.getMonth();
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+                    age--;
+                }
+                if (age < 18) {
+                    alert("Must be 18 and above")
+                }
+            });
+            $('#NurseCertification').change(function () {
+                var dob = new Date($(this).val());
+                var today = new Date();
+            });
+        });
+    </script>
+    @*<script type="text/javascript">
+        $(document).ready(function () {
+            $('input[type=datetime]').datetimepicker({
+                format: "DD/MM/YYYY"
+
+            });
+
+        });
+    </script>*@
+}
+

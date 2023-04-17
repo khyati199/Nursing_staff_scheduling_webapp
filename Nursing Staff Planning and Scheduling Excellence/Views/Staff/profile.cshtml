@@ -1,0 +1,325 @@
+﻿@model NursingStaffPlanningandSchedulingExcellence.Models.UserVM
+
+@{
+    ViewBag.Title = "My Page";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var dateCertificationExpiry = DateTime.Now.Date;
+    var oneMonth = dateCertificationExpiry.AddMonths(1) - dateCertificationExpiry;
+    var cutime = DateTime.Now;
+    var startdate = @ViewBag.CurrentStartTimer;
+    var Enddate = @ViewBag.Enddate;
+}
+
+<div id="page-wrapper">
+    <div class="container-fluid">
+        <div class="row m-t-20">
+            @if (TempData["Message"] != null)
+            {
+                <div class="alert alert-success" style="float: right;" role="alert">
+                    <b>@TempData["Message"]</b>
+                </div>
+            }
+            @if (TempData["DeleteMessage"] != null)
+            {
+                <div class="alert alert-danger" style="float: right;" role="alert">
+                    <b>@TempData["DeleteMessage"]</b>
+                </div>
+            }
+            @if (ViewBag.CurrentStartTimer != null)
+            {
+                <div class="TimerClass">
+                    <h2 class="timess"> Next Shift Remaining Time : </h2>
+                    <div id="timer" class="timess">
+                        <div class="timess" id="days"></div>
+                        <div class="timess" id="hours"></div>
+                        <div class="timess" id="minutes"></div>
+                        <div class="timess" id="seconds"></div>
+                    </div>
+                </div>
+            }
+            else if (ViewBag.Timer != null)
+            {
+                <div class="TimwerClass">
+                    <h2 class="timess"> Next Shift Remaining Time : </h2>
+                    <div id="timer" class="timess">
+                        <div class="timess" id="days"></div>
+                        <div class="timess" id="hours"></div>
+                        <div class="timess" id="minutes"></div>
+                        <div class="timess" id="seconds"></div>
+                    </div>
+                </div>
+            }
+            <div class="panel panel-info">
+                <div class="panel-heading "> @ViewBag.Title: @Model.FirstName @Model.LastName </div>
+                <div class="white-box">
+                    <div class="table-responsive">
+                        <table id="example" class="table  table-hover contact-list footable-loaded footable m-t-0" data-page-size="4">
+                            @if (Model != null)
+                            {
+                                <td>
+                                    <dl class="dl-horizontal">
+                                        <dt>
+                                            Name
+                                        </dt>
+
+                                        <dt>
+                                            User Name
+                                        </dt>
+
+                                        <dt>
+                                            Date of Birth
+                                        </dt>
+
+                                        <dt>
+                                            Nurse Certification Status
+                                        </dt>
+
+                                        <dt>
+                                            Gender
+                                        </dt>
+
+                                        <dt>
+                                            Address
+                                        </dt>
+
+                                        <dt>
+                                            Email
+                                        </dt>
+
+                                        <dt>
+                                            Phone <br /><br />
+                                        </dt>
+
+                                        <dt>
+                                            Action
+                                        </dt>
+
+                                    </dl>
+                                </td>
+                                <td>
+                                    <dl class="dl-horizontal">
+                                        <dd>
+                                            @Model.LastName, @Model.FirstName
+                                        </dd>
+                                        <dd>
+                                            @Model.UserName
+                                        </dd>
+                                        <dd>
+                                            @Model.DOB.Date
+                                        </dd>
+                                        @if (dateCertificationExpiry < Model.NurseCertification)
+                                        {
+                                            if (Model.NurseCertification - dateCertificationExpiry > dateCertificationExpiry.AddMonths(1) - dateCertificationExpiry)
+                                            {
+                                                <dd style="color:green">
+                                                    Good Until: (@string.Format("{0:MMMM d , yyyy}", Model.NurseCertification))
+                                                </dd>
+                                            }
+                                            else
+                                            {
+                                                <dd style="color:orange">
+                                                    Expiring: (@string.Format("{0:MMMM d , yyyy}", Model.NurseCertification))
+                                                </dd>
+                                            }
+
+
+                                        }
+                                        else
+                                        {
+                                            <dd style="color:red">
+                                                Expired: (@string.Format("{0:MMMM d , yyyy}", Model.NurseCertification))
+                                            </dd>
+                                        }
+                                        <dd>
+                                            @Model.GenderName
+                                        </dd>
+                                        <dd>
+
+                                            @(Model.Address != null ? Model.Address : "N/A"), @(Model.City != null ? Model.City : "N/A"), @(Model.Province != null ? Model.Province : "N/A"), @(Model.ZipCode != null ? Model.ZipCode : "N/A")
+                                        </dd>
+                                        <dd>
+                                            @Model.Email
+                                        </dd>
+                                        <dd>
+                                            Cell: @if (Model.CellPhone != null)
+                                            {@Model.CellPhone}
+                                        else
+                                        { @Html.Raw("N/A")} <br />
+                                            Home: @if (Model.HomePhone != null)
+                                            {@Model.HomePhone}
+                                        else
+                                        { @Html.Raw("N/A")}
+                                        </dd>
+                                        <dd>
+                                            <a href="~/Staff/Savestaff/@Model.UserId" class="fcbtn btn btn-info btn-outline btn-1f">
+                                                Edit Details
+                                            </a>
+                                        </dd>
+                                    </dl>
+                                </td>
+                            }
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    table {
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border: 1px solid #ccc;
+        padding: 5px;
+        text-align: center;
+    }
+
+        td dd {
+            text-align: left;
+        }
+
+    dt {
+        padding-right: 10px;
+        text-align: right;
+        margin-bottom: 8.5px;
+    }
+
+    .other-month {
+        color: #ccc;
+    }
+
+    .overflow-x-scroll {
+        overflow-x: scroll;
+    }
+
+    .table-schedule {
+        width: 80%;
+        margin: 3.5rem auto;
+    }
+
+        .table-schedule td, .table-schedule th {
+            border: none;
+        }
+
+    .day-schedule {
+        width: 50%;
+        margin: 3.5rem auto;
+    }
+
+        .day-schedule td, .day-schedule th {
+            border: none;
+        }
+
+            .day-schedule td.available-time {
+                background: #eee;
+            }
+
+            .day-schedule td.work-time {
+                background: #4cff00;
+            }
+
+            .day-schedule td.unavailable-time {
+                background: #808080;
+            }
+
+        .day-schedule
+
+        .borderless {
+            border: none;
+        }
+
+    .month-control {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin: 0 1rem;
+    }
+
+    .month-h2 {
+        width: 100%;
+        text-align: center;
+    }
+    .TimerClass {
+        line-height: 58px;
+        font-size: 64px;
+    }
+
+    .timess {
+        display: inline-block;
+        padding: 10px;
+        font-size: 20px;
+    }
+
+    .timess1 {
+        display: inline-block;
+        padding: 10px;
+        font-size: 20px;
+        color: red;
+    }
+
+    #days {
+        font-size: 20px;
+        color: #db4844;
+    }
+
+    #hours {
+        font-size: 20px;
+        color: #f07c22;
+    }
+
+    #minutes {
+        font-size: 20px;
+        color: #f6da74;
+    }
+
+    #seconds {
+        font-size: 15px;
+        color: #abcd58;
+    }
+</style>
+
+<script>
+        function makeTimer() {
+            var endTime = Date;
+
+
+            if ('@Model.Enddate' != '') {
+                if ('@ViewBag.CurrentStartTimmer' > '@ViewBag.Enddate') {
+                    endTime = new Date('@ViewBag.Enddate');
+                }
+                else {
+                    endTime = new Date('@ViewBag.Enddate');
+                }
+            }
+            else {
+                 endTime = new Date('@ViewBag.Timer');
+            }
+            endTime = (Date.parse(endTime) / 1000);
+
+            var now = new Date();
+            now = (Date.parse(now) / 1000);
+
+            var timeLeft = endTime - now;
+
+            var days = Math.floor(timeLeft / 86400);
+            var hours = Math.floor((timeLeft - (days * 86400)) / 3600);
+            var minutes = Math.floor((timeLeft - (days * 86400) - (hours * 3600)) / 60);
+            var seconds = Math.floor((timeLeft - (days * 86400) - (hours * 3600) - (minutes * 60)));
+
+            if (hours < "10") { hours = "0" + hours; }
+            if (minutes < "10") { minutes = "0" + minutes; }
+            if (seconds < "10") { seconds = "0" + seconds; }
+
+            $("#days").html(days + "<span>Days</span>");
+            $("#hours").html(hours + "<span>Hours</span>");
+            $("#minutes").html(minutes + "<span>Minutes</span>");
+            $("#seconds").html(seconds + "<span>Seconds</span>");
+
+        }
+
+        setInterval(function () { makeTimer(); }, 1000);
+</script>

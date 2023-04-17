@@ -1,0 +1,84 @@
+﻿@{
+    ViewBag.Title = "Contact";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .carousel-caption {
+        position: static;
+    }
+
+        .carousel-caption p {
+            color: black;
+        }
+
+    .carousel-control-prev {
+        color: black;
+    }
+
+    .carousel-control-prev-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath d='M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z'/%3e%3c/svg%3e")
+    }
+
+    .carousel-control-next-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23030'%3e%3cpath d='M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e")
+    }
+</style>
+
+<div id="page-wrapper">
+    <div class="container-fluid">
+        <div class="row m-t-20">
+            <div class="panel panel-info">
+                <div class="panel-heading "> @ViewBag.Title </div>
+                <div class="white-box">
+                    <div class="table-responsive">
+                        <div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-indicators">
+                                <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                                <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                                <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2" aria-label="Slide 3"></button>
+                            </div>
+                            <div class="carousel-inner">
+                                <div class="carousel-item active">
+
+                                    <div class="carousel-caption d-none d-md-block">
+                                        <h5>Email</h5>
+                                        <p>
+                                            <strong>Support:</strong>   <a href=#>bizsupport@mgbs.com</a><br />
+                                            <strong>Marketing:</strong> <a href=#>Marketing@example.com</a>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="carousel-item">
+
+                                    <div class="carousel-caption d-none d-md-block">
+                                        <h5>Phone Number</h5>
+                                        <p>425.555.0100</p>
+                                    </div>
+                                </div>
+                                <div class="carousel-item">
+
+                                    <div class="carousel-caption d-none d-md-block">
+                                        <h5>Address</h5>
+                                        <p>
+                                            Silicon Valley,<br />
+                                            East Bay, CA<br />
+                                        </p>
+                                    </div>
+                                </div>
+                                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,354 @@
+﻿@model NursingStaffPlanningandSchedulingExcellence.Models.ShiftGapVM
+@{
+    ViewBag.Title = "StaffGap";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int sno = 0;
+    string[] followingDays = new string[14];
+    int[] gapForNextDays = new int[14];
+    int[] requiredStaff = new int[14];
+    int[] actualStaffNumber = new int[14];
+}
+
+<style>
+    table {
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border: 1px solid #ccc;
+        padding: 5px;
+        text-align: center;
+    }
+
+        td dd {
+            text-align: left;
+        }
+
+    dt {
+        padding-right: 10px;
+        text-align: right;
+        margin-bottom: 8.5px;
+    }
+
+    .other-month {
+        color: #ccc;
+    }
+
+    .overflow-x-scroll {
+        overflow-x: scroll;
+    }
+
+    .table-schedule {
+        width: 80%;
+        margin: 2.5rem auto;
+    }
+
+        .table-schedule td, .table-schedule th {
+            border: none;
+        }
+
+    .day-schedule {
+        width: 50%;
+        margin: 1.5rem auto;
+    }
+
+        .day-schedule td, .day-schedule th {
+            border: none;
+        }
+
+            .day-schedule td.available-time {
+                background: #eee;
+            }
+
+            .day-schedule td.work-time {
+                background: #4cff00;
+            }
+
+            .day-schedule td.unavailable-time {
+                background: #808080;
+            }
+
+        .day-schedule
+
+        .borderless {
+            border: none;
+        }
+
+    .month-control {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin: 0 1rem;
+    }
+
+    .month-h2 {
+        width: 100%;
+        text-align: center;
+        margin-top: 20px;
+    }
+</style>
+
+<div id="page-wrapper">
+    <div class="container-fluid">
+        <div class="row m-t-20">
+            @if (TempData["Message"] != null)
+            {
+                <div class="alert alert-success" style="float: right;" role="alert">
+                    <b>@TempData["Message"]</b>
+                </div>
+            }
+            @if (TempData["DeleteMessage"] != null)
+            {
+                <div class="alert alert-danger" style="float: right;" role="alert">
+                    <b>@TempData["DeleteMessage"]</b>
+                </div>
+            }
+            <canvas id="myChart" style="max-height:25vw; min-height:25vw; margin-bottom:10px"></canvas>
+            <div class="container">
+                <div class="row">
+                    <div class="col">
+                        <div class="panel panel-info">
+                            <div class="panel-heading "> My Calendar</div>
+                            <div class="white-box">
+                                @{
+                                    var now = ViewBag.chosenMonth != null ? ViewBag.chosenMonth : DateTime.Now;
+                                    var daysInMonth = DateTime.DaysInMonth(now.Year, now.Month);
+                                    var firstDayOfMonth = new DateTime(now.Year, now.Month, 1);
+                                    var lastDayOfMonth = new DateTime(now.Year, now.Month, daysInMonth);
+                                    var previousMonth = firstDayOfMonth.AddMonths(-1);
+                                    var nextMonth = firstDayOfMonth.AddMonths(1);
+                                    var daysOfWeek = new[] { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
+                                }
+
+                                <div class="month-control">
+                                    <h4 class="month-h2">@now.ToString("MMMM yyyy")</h4>
+                                    <a href="@Url.Action("StaffGap", new { year = previousMonth.Year, month = previousMonth.Month })">&lt; Previous Month</a> --|--
+                                    <a href="@Url.Action("StaffGap", new { year = nextMonth.Year, month = nextMonth.Month })">Next Month &gt;</a>
+                                </div>
+
+                                <table class="table-schedule">
+                                    <thead>
+                                        <tr>
+                                            @foreach (var dayOfWeek in daysOfWeek)
+                                            {
+                                                <th>@dayOfWeek</th>
+                                            }
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (int day = 1; day <= daysInMonth; day++)
+                                        {
+                                            var date = new DateTime(now.Year, now.Month, day);
+                                            if (date.DayOfWeek == DayOfWeek.Sunday)
+                                            {
+                                                @:<tr>
+                                                }
+                                                if (day == 1)
+                                                {
+
+                                                    for (int gap = 0; gap < (int)date.DayOfWeek; gap++)
+                                                    {
+                                                        @:<td class="borderless"></td>
+                                                    }
+                                                }
+                                                <td>
+                                                    @if (date >= firstDayOfMonth && date <= lastDayOfMonth)
+                                                    {
+                                                        <span><a href="@Url.Action("StaffGap", new { year = now.Year, month = now.Month, day = day })">@day</a></span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="other-month">@day</span>
+                                                    }
+
+                                                </td>
+                                                if (date.DayOfWeek == DayOfWeek.Saturday)
+                                                {
+                                                @:</tr>
+                                            }
+
+                                            if (lastDayOfMonth.DayOfWeek == DayOfWeek.Saturday)
+                                            {
+                                                @:</tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="panel-info">
+                            <div class="panel-heading">
+                                Table Gap of Selected Date
+                            </div>
+                            @{
+                                DateTime chosenDay = ViewBag.chosenDate != null ? ViewBag.chosenDate : now;
+                                DateTime chosenShiftDay = ViewBag.chosenDate != null ? ViewBag.chosenDate : now;
+                                var requiredNumber = 12;
+                            }
+                            <h4 class="month-h2">@chosenDay.ToString("dd MMMM yyyy") | <a class="fcbtn btn btn-info btn-outline btn-1f" href="~/Admin/ScheduleList?year=@chosenDay.Year&month=@chosenDay.Month&day=@chosenDay.Day">Fill Gap</a> </h4> 
+
+                            <div class="table-responsive">
+
+                                <table id="example" class="table table-hover contact-list footable-loaded footable m-t-0">
+                                    <thead>
+                                        <tr class="text-dark">
+                                            <th class="footable-sortable text-center" scope="col">Required Number of Staff<span class="footable-sort-indicator"></span></th>
+                                            <th class="footable-sortable text-center" scope="col">Number of Staff for the Day<span class="footable-sort-indicator"></span></th>
+                                            <th class="footable-sortable text-center" scope="col">Gap<span class="footable-sort-indicator"></span></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model.WholeCalendarShifts != null)
+                                        {
+
+                                            var shiftsForDay = Model.WholeCalendarShifts.Where(x => x.StartDate.Value.Date == chosenDay.Date).ToList();
+
+                                            for (int i = 0; i < 14; i++)
+                                            {
+                                                DateTime currentDay = DateTime.Now.Date;
+                                                DateTime day = currentDay.AddDays(i);
+                                                var gapForDay = Model.WholeCalendarShifts.Where(x => x.StartDate.Value.Date == day.Date).ToList();
+                                                var gap = requiredNumber - gapForDay.Count;
+                                                followingDays[0] = "Today";
+                                                followingDays[i] = day.DayOfWeek.ToString();
+                                                actualStaffNumber[i] = gapForDay.Count;
+                                                requiredStaff[i] = requiredNumber;
+                                                gapForNextDays[i] = gap;
+                                                if (i > 6)
+                                                {
+                                                    followingDays[i] = (day.DayOfWeek.ToString() + "(2)");
+                                                }
+                                            }
+
+                                            sno = sno + 1;
+                                            <tr role="row" class="line-content">
+                                                <td>@requiredNumber</td>
+                                                <td>@shiftsForDay.Count</td>
+                                                @if ((requiredNumber - shiftsForDay.Count) > 0)
+                                                {
+                                                    <td style="color:red">@(requiredNumber-shiftsForDay.Count)</td>
+                                                }
+                                                else
+                                                if ((requiredNumber - shiftsForDay.Count) < 0)
+                                                {
+                                                    <td style="color:blue">@(requiredNumber-shiftsForDay.Count) (too much)</td>
+                                                }
+                                                else
+                                                    if ((requiredNumber - shiftsForDay.Count) == 0)
+                                                {
+                                                    <td style="color:green">@(requiredNumber-shiftsForDay.Count)</td>
+
+                                                }
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="table-responsive" style="max-height: 50vh; overflow-y:scroll">
+                                <table id="example" class="table table-hover contact-list footable-loaded footable m-t-0">
+                                    <thead>
+                                        <tr class="text-dark">
+                                            <th class="footable-sortable text-center" scope="col">Name<span class="footable-sort-indicator"></span></th>
+                                            <th class="footable-sortable text-center" scope="col">Start Date<span class="footable-sort-indicator"></span></th>
+                                            <th class="footable-sortable text-center" scope="col">End Date<span class="footable-sort-indicator"></span></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model.WholeCalendarShifts != null)
+                                        {
+                                            foreach (var user in Model.AllUsers)
+                                            {
+                                                foreach (var shift in Model.WholeCalendarShifts)
+                                                {
+                                                    if (shift.StartDate.Value.Date == chosenShiftDay.Date)
+                                                    {
+
+
+                                                        <tr role="row" class="line-content">
+                                                            @if (user.UserId == shift.UserId)
+                                                            {
+                                                                <td>
+                                                                    @user.LastName, @user.FirstName
+                                                                </td>
+                                                                <td>@(shift.StartDate != null ? string.Format("{0:MMMM d , yyyy h:mm tt}", shift.StartDate) : "")</td>
+                                                                <td>@(shift.EndDate != null ? string.Format("{0:MMMM d , yyyy h:mm tt}", shift.EndDate) : "")</td>
+                                                            }
+
+                                                        </tr>
+                                                    }
+
+                                                }
+                                            }
+
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script>
+
+    var data = {
+    // Sample data for the next 14 days
+        labels: @Html.Raw(Json.Encode(followingDays)),
+        datasets: [{
+            label: 'Gap',
+            data: @Html.Raw(Json.Encode(gapForNextDays)),
+            backgroundColor: [
+                'rgba(255, 122, 222, 0.2)',
+            ],
+            borderColor: [
+                'rgba(255, 122, 222, 1)',
+            ],
+            borderWidth: 1
+        },{
+            label: 'Peak',
+            data: @Html.Raw(Json.Encode(requiredStaff)),
+            backgroundColor: [
+                'rgba(65, 65, 65, 0.2)',
+            ],
+            borderColor: [
+                'rgba(65, 65, 65, 1)',
+            ],
+            borderWidth: 1
+        },{
+            label: 'Actual',
+            data: @Html.Raw(Json.Encode(actualStaffNumber)),
+            backgroundColor: [
+                'rgba(111, 222, 111, 0.2)',
+            ],
+            borderColor: [
+                'rgba(111, 222, 111, 1)',
+            ],
+            borderWidth: 1
+        }]
+    };
+
+    // Chart configuration
+    var config = {
+        type: 'line',
+        data: data,
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    };
+
+    // Create the chart
+    var myChart = new Chart(document.getElementById('myChart'), config);
+</script>

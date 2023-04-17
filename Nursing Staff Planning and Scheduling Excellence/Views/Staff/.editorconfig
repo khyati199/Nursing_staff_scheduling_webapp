@@ -1,0 +1,782 @@
+
+ShiftSchedule(03/23) <div>-----------------------------------------------------------------------------------------------------------------------------------------</div>
+
+@model NursingStaffPlanningandSchedulingExcellence.Models.ShiftScheduleVM
+@{
+    var UserId = !string.IsNullOrEmpty(this.Context.Request["userid"]) ? this.Context.Request["userid"].ToString() : "0";
+    var Id = !string.IsNullOrEmpty(this.Context.Request["id"]) ? this.Context.Request["id"].ToString() : "0";
+    ViewBag.Title = "AddStaff";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var sno = 0;
+}
+<style>
+    .user-profile .user-pro-body {
+        display: block;
+        margin-top: 40px !important;
+    }
+
+    button.btn.btn-primary.btn-block {
+        margin-top: 25px;
+    }
+
+    .col-md-12.offset-md-1 {
+        margin-left: 0;
+    }
+
+    .col.offset-md-1 {
+        margin-left: 12px;
+    }
+
+    select#ShiftId {
+        height: 32px;
+    }
+</style>
+<div class="col-sm-12">
+    <div class="row m-t-20">
+        @if (TempData["Message"] != null)
+        {
+            <div class="alert alert-success" style="float: right;" role="alert">
+                <b>@TempData["Message"]</b>
+            </div>
+        }
+        @if (TempData["DeleteMessage"] != null)
+        {
+            <div class="alert alert-danger" style="float: right;" role="alert">
+                <b>@TempData["DeleteMessage"]</b>
+            </div>
+        }
+
+        <div class="panel panel-info">
+            <div class="panel-heading ">@Model.Assignname - Schedule Shift </div>
+            <div class="white-box">
+                @using (Html.BeginForm("ShiftSchedules", "Admin", new { id = Id }, FormMethod.Post, new { id = "ShiftScheduleForm", enctype = "multipart/form-data" }))
+                {
+
+                    @Html.HiddenFor(model => model.UserId)
+                    <div class="row">
+                        <div class="col-md-12 offset-md-1">
+                            <form id="form_create_appointment">
+                                <div class="col-md-3 form-group">
+                                    <label class="required">Shift Start</label>
+                                    @Html.EditorFor(model => model.StartDate, new { htmlAttributes = new { @class = "form-control" } })
+                                    @Html.ValidationMessageFor(model => model.StartDate, "", new { @class = "text-danger" })
+                                </div>
+
+                                <div class="col-md-3 form-group">
+                                    <label class="required">Shift End</label>
+                                    @Html.EditorFor(model => model.EndDate, new { htmlAttributes = new { @class = "form-control" } })
+                                    @Html.ValidationMessageFor(model => model.EndDate, "", new { @class = "text-danger" })
+                                </div>
+
+                                <div class="form-row">
+
+                                    <div class="col-md-3 form-group">
+                                        <button type="submit" class="btn btn-primary btn-block">Save</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col offset-md-1">
+                            <div class="row">
+                                <div class="col">
+                                    <h3>Scheduled Shift</h3>
+                                </div>
+                            </div>
+                            <table class="table table-bordered table-hover table-striped table-sm" id="appointment_list">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th scope="col" class="text-center align-middle">Sno.</th>
+                                        <th scope="col" class="text-center align-middle">Start Date</th>
+                                        <th scope="col" class="text-center align-middle">End Date</th>
+                                        <th scope="col" class="text-center align-middle">Start time</th>
+                                        <th scope="col" class="text-center align-middle">End time</th>
+                                        <th scope="col" class="text-center align-middle">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.ShiftScheduleList != null)
+                                    {
+                                        foreach (var item in Model.ShiftScheduleList)
+                                        {
+                                            sno = sno + 1;
+                                            <tr role="row" class="line-content">
+                                                <td class="text-center">@sno</td>
+                                                <td class="text-center">@(item.StartDate.Value.ToString("dddd, dd MMMM yyyy"))</td>
+                                                <td class="text-center">@(item.EndDate.Value.ToString("dddd, dd MMMM yyyy"))</td>
+                                                <td class="text-center">@(item.StartDate.Value.ToString("hh:mm tt"))</td>
+                                                <td class="text-center">@(item.EndDate.Value.ToString("hh:mm tt"))</td>
+                                                <td class="text-center">
+                                                    <span class="delete"><a href="~/Admin/ShiftSchedule/?id=@item.Id&userid=@item.UserId" class="fcbtn btn btn-info btn-outline btn-1f">Edit</a></span>
+                                                    <span class="delete"><a href="~/Admin/DeleteShiftSchedule/@item.Id/?userid=@item.UserId" onclick="return confirm('Are you sure you wish to Delete item ?');" class="fcbtn btn btn-danger btn-outline btn-1f">Delete</a></span>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.rawgit.com/Eonasdan/bootstrap-datetimepicker/e8bddc60e73c1ec2475f827be36e1957af72e2ea/build/css/bootstrap-datetimepicker.css" rel="stylesheet">
+
+
+<script>
+
+     $(document).ready(function () {
+        var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+        $('#StartDate').datetimepicker({
+            minDate: today,
+            //format: 'D/MM/YYYY h:mm A',
+        });
+        $('#EndDate').datetimepicker({
+            minDate: today,
+            //format: 'D/MM/YYYY h:mm A',
+        });
+
+        jQuery.validator.methods["date"] = function (value, element) { return true; }
+        $.ajax({
+            type: 'Get',
+            url: '/Admin/ShiftSchedule/',
+            data: { UserId: UserId, StartDate: StartDate, EndDate: EndDate },
+            success: function (data) {
+                window.location.href = `/Admin/ShiftSchedule?StartDate=${StartDate}&UserId=${UserId}&EndDate=${'@Model.EndDate'}&id=${'@Id'}`;
+
+            }
+        })
+     });
+
+</script>
+
+
+StaffDetails(03/23) <div>-----------------------------------------------------------------------------------------------------------------------------------------</div>
+
+@model NursingStaffPlanningandSchedulingExcellence.Models.UserWithScheduleVM
+
+@{
+    ViewBag.Title = "Staff Detail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div id="page-wrapper">
+    <div class="container-fluid">
+        <div class="row m-t-20">
+            @if (TempData["Message"] != null)
+            {
+                <div class="alert alert-success" style="float: right;" role="alert">
+                    <b>@TempData["Message"]</b>
+                </div>
+            }
+            @if (TempData["DeleteMessage"] != null)
+            {
+                <div class="alert alert-danger" style="float: right;" role="alert">
+                    <b>@TempData["DeleteMessage"]</b>
+                </div>
+            }
+            <div class="row">
+                <div class="col">
+                    <div class="panel panel-info">
+                        <div class="panel-heading "> @ViewBag.Title: @Model.User.FirstName @Model.User.LastName </div>
+                        <div class="white-box">
+                            <div class="table-responsive">
+                                <table id="example" class="table  table-hover contact-list footable-loaded footable m-t-0" data-page-size="4">
+                                    @if (Model != null)
+                                    {
+                                        <td>
+                                            <dl class="dl-horizontal">
+                                                <dt>
+                                                    Name
+                                                </dt>
+
+                                                <dt>
+                                                    User Name
+                                                </dt>
+
+                                                <dt>
+                                                    Date of Birth
+                                                </dt>
+
+                                                <dt>
+                                                    Address
+                                                </dt>
+
+                                                <dt>
+                                                    Email
+                                                </dt>
+
+                                                <dt>
+                                                    Phone <br /><br />
+                                                </dt>
+
+                                                <dt>
+                                                    Action
+                                                </dt>
+
+                                            </dl>
+                                        </td>
+                                        <td>
+                                            <dl class="dl-horizontal">
+                                                <dd>
+                                                    @Model.User.LastName, @Model.User.FirstName
+                                                </dd>
+                                                <dd>
+                                                    @Model.User.UserName
+                                                </dd>
+                                                <dd>
+                                                    @Model.User.DOB
+                                                </dd>
+                                                <dd>
+                                                    @Model.User.Address, @Model.User.City, @Model.User.Province, @Model.User.ZipCode
+                                                </dd>
+                                                <dd>
+                                                    @Model.User.Email
+                                                </dd>
+                                                <dd>
+                                                    Cell: @if (Model.User.CellPhone != null)
+                                                    {@Model.User.CellPhone}
+                                                else
+                                                { @Html.Raw("N/A")} <br />
+                                                    Home: @if (Model.User.HomePhone != null)
+                                                    {@Model.User.HomePhone}
+                                                else
+                                                { @Html.Raw("N/A")}
+                                                </dd>
+                                                <dd>
+                                                    <a href="~/Staff/Savestaff/@Model.User.UserId" class="fcbtn btn btn-info btn-outline btn-1f">
+                                                        Update
+                                                    </a>
+                                                </dd>
+                                            </dl>
+                                        </td>
+                                    }
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="panel panel-info">
+                        <div class="panel-heading "> My Calendar</div>
+                        <div class="white-box">
+                            @{
+                                var now = ViewBag.chosenMonth != null ? ViewBag.chosenMonth : DateTime.Now;
+                                var daysInMonth = DateTime.DaysInMonth(now.Year, now.Month);
+                                var firstDayOfMonth = new DateTime(now.Year, now.Month, 1);
+                                var lastDayOfMonth = new DateTime(now.Year, now.Month, daysInMonth);
+                                var previousMonth = firstDayOfMonth.AddMonths(-1);
+                                var nextMonth = firstDayOfMonth.AddMonths(1);
+                                var daysOfWeek = new[] { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
+                            }
+
+                            <div class="month-control">
+                                <h2 class="month-h2">@now.ToString("MMMM yyyy")</h2>
+                                <a href="@Url.Action("StaffDetails", new { year = previousMonth.Year, month = previousMonth.Month })">&lt; Previous Month</a>   --|--
+                                <a href="@Url.Action("StaffDetails", new { year = nextMonth.Year, month = nextMonth.Month })">Next Month &gt;</a>
+                            </div>
+
+                            <table class="table-schedule">
+                                <thead>
+                                    <tr>
+                                        @foreach (var dayOfWeek in daysOfWeek)
+                                        {
+                                            <th>@dayOfWeek</th>
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (int day = 1; day <= daysInMonth; day++)
+                                    {
+
+                                        var date = new DateTime(now.Year, now.Month, day);
+                                        if (date.DayOfWeek == DayOfWeek.Sunday)
+                                        {
+                                            @:<tr>
+                                            }
+                                            if (day == 1)
+                                            {
+
+                                                for (int gap = 0; gap < (int)date.DayOfWeek; gap++)
+                                                {
+                                                    @:<td class="borderless"></td>
+                                                }
+                                            }
+                                            <td>
+
+
+                                                @if (date >= firstDayOfMonth && date <= lastDayOfMonth)
+                                                {
+                                                    var hasShift = Model.WholeCalendarShifts.Find(x => x.StartDate.Value.Date == date || x.EndDate.Value.Date == date);
+                                                    if (hasShift != null)
+                                                    {<span><a href="@Url.Action("StaffDetails", new { year = now.Year, month = now.Month, day = day })">@day</a></span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="other-month">@day</span>
+                                                }
+
+                                            }
+                                            </td>
+                                            if (date.DayOfWeek == DayOfWeek.Saturday)
+                                            {
+                                            @:</tr>
+                                        }
+
+                                        if (lastDayOfMonth.DayOfWeek == DayOfWeek.Saturday)
+                                        {
+                                            @:</tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="panel panel-info">
+                <div class="panel-heading">Schedule</div>
+                <div class="white-box overflow-x-scroll">
+                    @{
+                        var schedule = ViewBag.chosenDate != null ? ViewBag.chosenDate : now;
+                    }
+                    <div class="month-control">
+                        <h2 class="month-h2">@schedule.ToString("yyyy, MMMM d")</h2>
+                    </div>
+                    <table class="day-schedule">
+                        <tbody>
+                            <tr>
+                                <th>Time</th>
+                                @for (int hour = 0; hour <= 23; hour++)
+                                {
+                                    for (int minute = 0; minute <= 45; minute += 30)
+                                    {
+                                        var time = new DateTime(schedule.Year, schedule.Month, schedule.Day, hour, minute, 0);
+                                        <td>@time.ToString("h:mm tt")</td>
+                                    }
+                                }
+                            </tr>
+                            <tr style="height: 4rem">
+                                <th></th>
+                                @for (int hour = 0; hour <= 23; hour++)
+                                {
+                                    for (int minute = 0; minute <= 45; minute += 30)
+                                    {
+                                        var time = new DateTime(schedule.Year, schedule.Month, schedule.Day, hour, minute, 0);
+
+                                        var isBooked = Model.ShiftScheduleList.FirstOrDefault(x => x.StartDate <= time && time <= x.EndDate);
+
+                                        if (isBooked != null)
+                                        {
+                                            @:<td class="work-time"></td>
+                                        }
+                                        else
+                                        {
+                                            @:<td class="unavailable-time"></td>
+                                        }
+
+                                    }
+                                }
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*foreach (var shiftstart in Model.WholeCalendarShifts)
+    {
+        var hasShift = Model.WholeCalendarShifts.FirstOrDefault(x => x.StartDate.Value.Date == date || x.EndDate.Value.Date == date);
+        var hasShift = Model.WholeCalendarShifts.Select(x => x.StartDate.Value.Date);*@
+
+<style>
+    table {
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border: 1px solid #ccc;
+        padding: 5px;
+        text-align: center;
+    }
+
+        td dd {
+            text-align: left;
+        }
+
+    dt {
+        padding-right: 10px;
+        text-align: right;
+        margin-bottom: 8.5px;
+    }
+
+    .other-month {
+        color: #ccc;
+    }
+
+    .overflow-x-scroll {
+        overflow-x: scroll;
+    }
+
+    .table-schedule {
+        width: 80%;
+        margin: 3.5rem auto;
+    }
+
+        .table-schedule td, .table-schedule th {
+            border: none;
+        }
+
+    .day-schedule {
+        width: 50%;
+        margin: 3.5rem auto;
+    }
+
+        .day-schedule td, .day-schedule th {
+            border: none;
+        }
+
+            .day-schedule td.available-time {
+                background: #eee;
+            }
+
+            .day-schedule td.work-time {
+                background: #4cff00;
+            }
+
+            .day-schedule td.unavailable-time {
+                background: #808080;
+            }
+
+        .day-schedule
+
+        .borderless {
+            border: none;
+        }
+
+    .month-control {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin: 0 1rem;
+    }
+
+    .month-h2 {
+        width: 100%;
+        text-align: center;
+    }
+</style>
+
+Staff Folder -> shiftschedule(03/23) <div>-----------------------------------------------------------------------------------------------------------------------------------------</div>
+
+@model NursingStaffPlanningandSchedulingExcellence.Models.ShiftScheduleVM
+@{
+    ViewBag.Title = "AddStaff";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var sno = 0;
+}
+<style>
+    table {
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border: 1px solid #ccc;
+        padding: 5px;
+        text-align: center;
+    }
+
+        td dd {
+            text-align: left;
+        }
+
+    dt {
+        padding-right: 10px;
+        text-align: right;
+        margin-bottom: 8.5px;
+    }
+
+    .other-month {
+        color: #ccc;
+    }
+
+    .overflow-x-scroll {
+        overflow-x: scroll;
+    }
+
+    .table-schedule {
+        width: 80%;
+        margin: 3.5rem auto;
+    }
+
+        .table-schedule td, .table-schedule th {
+            border: none;
+        }
+
+    .day-schedule {
+        width: 50%;
+        margin: 1.5rem auto;
+    }
+
+        .day-schedule td, .day-schedule th {
+            border: none;
+        }
+
+            .day-schedule td.available-time {
+                background: #eee;
+            }
+
+            .day-schedule td.work-time {
+                background: #4cff00;
+            }
+
+            .day-schedule td.unavailable-time {
+                background: #808080;
+            }
+
+        .day-schedule
+
+        .borderless {
+            border: none;
+        }
+
+    .month-control {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin: 0 1rem;
+    }
+
+    .month-h2 {
+        width: 100%;
+        text-align: center;
+        margin-top: 20px;
+    }
+</style>
+
+<div id="page-wrapper">
+    <div class="container-fluid">
+        <div class="row m-t-20">
+            @if (TempData["Message"] != null)
+            {
+                <div class="alert alert-success" style="float: right;" role="alert">
+                    <b>@TempData["Message"]</b>
+                </div>
+            }
+            @if (TempData["DeleteMessage"] != null)
+            {
+                <div class="alert alert-danger" style="float: right;" role="alert">
+                    <b>@TempData["DeleteMessage"]</b>
+                </div>
+            }
+            <div class="container">
+                <div class="row">
+                    <div class="col">
+                        <div class="panel-info">
+                            <div class="panel-heading">
+                                Schedule List
+                            </div>
+                            <div class="table-responsive" style="max-height: 50vh; overflow-y:scroll">
+                                <table id="example" class="table table-hover contact-list footable-loaded footable m-t-0">
+                                    <thead>
+                                        <tr class="text-dark">
+                                            <th class="footable-sortable text-center" scope="col" >S.No<span class="footable-sort-indicator"></span></th>
+                                            <th class="footable-sortable text-center" scope="col">Start Date<span class="footable-sort-indicator"></span></th>
+                                            <th class="footable-sortable text-center" scope="col">End Date<span class="footable-sort-indicator"></span></th>
+                                            <th class="footable-sortable text-center" scope="col">Start time<span class="footable-sort-indicator"></span></th>
+                                            <th class="footable-sortable text-center" scope="col">End time<span class="footable-sort-indicator"></span></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model.ShiftScheduleList != null)
+                                        {
+                                            //for (int i = 0; i < 5; i++) //overflow test
+                                            {
+                                                foreach (var item in Model.WholeCalendarShifts)
+                                                {
+                                                    sno = sno + 1;
+                                                    <tr role="row" class="line-content">
+                                                        <td>@sno</td>
+                                                        <td>@(item.StartDate != null ? string.Format("{0:MMMM d , yyyy}", item.StartDate) : "")</td>
+                                                        <td>@(item.EndDate != null ? string.Format("{0:MMMM d , yyyy}", item.EndDate) : "")</td>
+                                                        <td>@(item.StartDate.Value.ToString("hh:mm tt"))</td>
+                                                        <td>@(item.EndDate.Value.ToString("hh:mm tt"))</td>
+
+                                                    </tr>
+                                                }
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="panel panel-info">
+                            <div class="panel-heading "> My Calendar</div>
+                            <div class="white-box">
+                                @{
+                                    var now = ViewBag.chosenMonth != null ? ViewBag.chosenMonth : DateTime.Now;
+                                    var daysInMonth = DateTime.DaysInMonth(now.Year, now.Month);
+                                    var firstDayOfMonth = new DateTime(now.Year, now.Month, 1);
+                                    var lastDayOfMonth = new DateTime(now.Year, now.Month, daysInMonth);
+                                    var previousMonth = firstDayOfMonth.AddMonths(-1);
+                                    var nextMonth = firstDayOfMonth.AddMonths(1);
+                                    var daysOfWeek = new[] { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
+                                }
+
+                                <div class="month-control">
+                                    <h2 class="month-h2">@now.ToString("MMMM yyyy")</h2>
+                                    <a href="@Url.Action("ShiftSchedule", new { year = previousMonth.Year, month = previousMonth.Month })">&lt; Previous Month</a> --|--
+                                    <a href="@Url.Action("ShiftSchedule", new { year = nextMonth.Year, month = nextMonth.Month })">Next Month &gt;</a>
+                                </div>
+
+                                <table class="table-schedule">
+                                    <thead>
+                                        <tr>
+                                            @foreach (var dayOfWeek in daysOfWeek)
+                                            {
+                                                <th>@dayOfWeek</th>
+                                            }
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (int day = 1; day <= daysInMonth; day++)
+                                        {
+                                            var date = new DateTime(now.Year, now.Month, day);
+                                            if (date.DayOfWeek == DayOfWeek.Sunday)
+                                            {
+                                                @:<tr>
+                                                }
+                                                if (day == 1)
+                                                {
+
+                                                    for (int gap = 0; gap < (int)date.DayOfWeek; gap++)
+                                                    {
+                                                        @:<td class="borderless"></td>
+                                                    }
+                                                }
+                                                <td>
+                                                    @if (date >= firstDayOfMonth && date <= lastDayOfMonth)
+                                                    {
+                                                        var hasShift = Model.WholeCalendarShifts.Find(x => x.StartDate.Value.Date == date || x.EndDate.Value.Date == date);
+                                                        if (hasShift != null)
+                                                        {<span><a href="@Url.Action("ShiftSchedule", new { year = now.Year, month = now.Month, day = day })">@day</a></span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="other-month">@day</span>
+                                                    }
+                                                }
+
+                                                </td>
+                                                if (date.DayOfWeek == DayOfWeek.Saturday)
+                                                {
+                                                @:</tr>
+                                            }
+
+                                            if (lastDayOfMonth.DayOfWeek == DayOfWeek.Saturday)
+                                            {
+                                                @:</tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="panel panel-info">
+                <div class="panel-heading">Schedule</div>
+                <div class="white-box overflow-x-scroll">
+                    @{
+                        var schedule = ViewBag.chosenDate != null ? ViewBag.chosenDate : now;
+                    }
+                    <div class="month-control">
+                        <h2 class="month-h2">@schedule.ToString("yyyy, MMMM d")</h2>
+                    </div>
+                    <table class="day-schedule">
+                        <tbody>
+                            <tr>
+                                <th>Time</th>
+                                @for (int hour = 0; hour <= 23; hour++)
+                                {
+                                    for (int minute = 0; minute <= 45; minute += 30)
+                                    {
+                                        var time = new DateTime(schedule.Year, schedule.Month, schedule.Day, hour, minute, 0);
+                                        <td>@time.ToString("h:mm tt")</td>
+                                    }
+                                }
+                            </tr>
+                            <tr style="height: 4rem">
+                                <th></th>
+                                @for (int hour = 0; hour <= 23; hour++)
+                                {
+                                    for (int minute = 0; minute <= 45; minute += 30)
+                                    {
+                                        var time = new DateTime(schedule.Year, schedule.Month, schedule.Day, hour, minute, 0);
+
+                                        var isBooked = Model.ShiftScheduleList.FirstOrDefault(x => x.StartDate <= time && time <= x.EndDate);
+
+                                        if (isBooked != null)
+                                        {
+                                            @:<td class="work-time"></td>
+                                        }
+                                        else
+                                        {
+                                            @:<td class="unavailable-time"></td>
+                                        }
+                                    }
+                                }
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link href="https://cdn.datatables.net/1.13.3/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+<script src="https://cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.3/js/dataTables.bootstrap5.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#example').DataTable({ "pageLength": 10 });
+    });
+</script>
+
+
+HttpPost.shiftschedule validation(03/23) <div>-----------------------------------------------------------------------------------------------------------------------------------------</div>
+
+            //if ((objShift.EndDate < objShift.StartDate))
+            //{
+            //    TempData["DeleteMessage"] = string.Format("Shift End is earlier than Start Date");
+            //    return RedirectToAction("ShiftSchedule", new { userid = objShift.UserId });
+            //}
+            //TimeSpan shiftDuration = objShift.EndDate - objShift.StartDate;
+            //if (shiftDuration > new TimeSpan(12,0,0))
+            //{
+            //    TempData["DeleteMessage"] = string.Format("Shift hours can not be greater than 12 hours");
+            //    return RedirectToAction("ShiftSchedule", new { userid = objShift.UserId });
+            //}
+            //var sh = db.ShiftSchedule.Where(x => (EntityFunctions.TruncateTime(x.StartDate) == EntityFunctions.TruncateTime(objShift.StartDate) || EntityFunctions.TruncateTime(x.EndDate) == EntityFunctions.TruncateTime(objShift.EndDate)) && x.UserId == objShift.UserId && x.Id != objShift.Id).FirstOrDefault();
+            //if (sh != null)
+            //{
+            //    TempData["DeleteMessage"] = string.Format("Already schedule the user for this date please choose new date ");
+            //    return RedirectToAction("ShiftSchedule", new { userid = objShift.UserId });
+            //}
+            //else

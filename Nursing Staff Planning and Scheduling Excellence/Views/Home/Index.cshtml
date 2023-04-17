@@ -1,0 +1,111 @@
+﻿@model NursingStaffPlanningandSchedulingExcellence.Models.UserVM
+@{
+    ViewBag.Title = "AllStaffList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var sno = 0;
+    var sno1 = 0;
+    var now = DateTime.Now.Date;
+}
+<style>
+
+    .user-profile .user-pro-body {
+        display: block;
+        margin-top: 41px !important;
+    }
+
+    button.btn.btn-primary.btn-block {
+        margin-top: 25px;
+    }
+
+    .col-md-12.offset-md-1 {
+        margin-left: 0;
+    }
+
+    .col.offset-md-1 {
+        margin-left: 12px;
+    }
+
+    select#ShiftId {
+        height: 32px;
+    }
+</style>
+
+<div id="page-wrapper">
+    <div class="container-fluid">
+        <div class="row m-t-20">
+            @if (TempData["Message"] != null)
+            {
+                <div class="alert alert-success" style="float: right;" role="alert">
+                    <b>@TempData["Message"]</b>
+                </div>
+            }
+            <div class="panel panel-info">
+                <div class="panel-heading "> MGBS Admin Dashboard </div>
+                <div class="white-box">
+                    <div class="table-responsive">
+                        <table id="example" class="table  table-hover contact-list footable-loaded footable m-t-0" data-page-size="4">
+                            <thead>
+                                <tr>
+                                    <th class="footable-sortable text-center">S.No<span class="footable-sort-indicator"></span></th>
+                                    <th class="footable-sortable text-center">Name<span class="footable-sort-indicator"></span></th>
+                                    <th class="footable-sortable text-center">Email<span class="footable-sort-indicator"></span></th>
+                                    <th class="footable-sortable text-center">Cell Phone<span class="footable-sort-indicator"></span></th>
+                                    <th class="footable-sortable text-center">Date Of Birth<span class="footable-sort-indicator"></span></th>
+                                    <th class="footable-sortable text-center">Nurse Certification Status<span class="footable-sort-indicator"></span></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @if (Model.userList != null)
+                                {
+
+                                    foreach (var item in Model.userList)
+                                    {
+                                        sno = sno + 1;
+                                        <tr role="row" class="line-content">
+                                            <td class="text-center">@sno</td>
+                                            <td class="text-center">@item.LastName, @item.FirstName</td>
+                                            <td class="text-center">@item.Email</td>
+                                            <td class="text-center">@item.CellPhone</td>
+                                            <td class="text-center">@(item.DOB != null ? string.Format("{0:MMMM d , yyyy}", item.DOB) : "")</td>
+                                            @if (now < item.NurseCertification)
+                                            {
+                                                if (item.NurseCertification - now > now.AddMonths(1) - now)
+                                                {
+                                                    <td class="text-center" style="color:green">Good Until: (@string.Format("{0:MMMM d , yyyy}", item.NurseCertification.Date)) </td>
+                                                }
+                                                else
+                                                {
+                                                    <td class="text-center" style="color:orange">Expiring: (@string.Format("{0:MMMM d , yyyy}", item.NurseCertification)) </td>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <td class="text-center" style="color:red">Expired: (@string.Format("{0:MMMM d , yyyy}", item.NurseCertification)) </td>
+                                            }
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @*<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.2.0/css/bootstrap.min.css" rel="stylesheet">*@
+    <link href="https://cdn.datatables.net/1.13.3/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <script src="https://cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.3/js/dataTables.bootstrap5.min.js"></script>
+    @*<script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/dataTables.material.min.js"></script>*@
+    <script>
+        $(document).ready(function () {
+            $('#example').DataTable({ "pageLength": 10 });
+        });
+    </script>
+}
