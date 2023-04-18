@@ -66,7 +66,7 @@
                                             <td class="text-center">@sno</td>
                                             <td class="text-center">@item.LastName, @item.FirstName</td>
                                             <td class="text-center">@item.Email</td>
-                                            <td class="text-center">@item.CellPhone</td>
+                                            <td class="text-center">@(item.CellPhone != null ?  item.CellPhone : "N/A")</td>
                                             <td class="text-center">@(item.DOB != null ? string.Format("{0:MMMM d , yyyy}", item.DOB) : "")</td>
                                             @if (now < item.NurseCertification)
                                             {
@@ -102,7 +102,7 @@
     <script src="https://cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.3/js/dataTables.bootstrap5.min.js"></script>
     @*<script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/dataTables.material.min.js"></script>*@
+        <script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/dataTables.material.min.js"></script>*@
     <script>
         $(document).ready(function () {
             $('#example').DataTable({ "pageLength": 10 });

@@ -13,10 +13,11 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.UI.WebControls;
 
 namespace NursingStaffPlanningandSchedulingExcellence.Controllers
 {
-    [Authorize (Roles = "Staff")]
+    [Authorize(Roles = "Staff")]
     public class StaffController : Controller
     {
         NursingStaffEntities db = new NursingStaffEntities();
@@ -25,15 +26,15 @@ namespace NursingStaffPlanningandSchedulingExcellence.Controllers
         {
             return View();
         }
-       
+
         [HttpGet]
         public async Task<ActionResult> profile(int? UserID)
         {
 
             int UserIDs = LoginRepository.GetUserID(User.Identity.Name);
-            if(UserIDs==0)
+            if (UserIDs == 0)
             {
-                UserIDs = UserID??0;
+                UserIDs = UserID ?? 0;
             }
             UserVM obj = new UserVM();
             DateTime currentdate = DateTime.Now.Date;
@@ -41,9 +42,9 @@ namespace NursingStaffPlanningandSchedulingExcellence.Controllers
             //var shifts = db.ShiftSchedule.Where(x => DbFunctions.TruncateTime(x.StartDate) >= currentdate && x.UserId == UserIDs).OrderBy(x => x.StartDate).FirstOrDefault();
             var c = db.ShiftSchedule.Where(x => DbFunctions.TruncateTime(x.StartDate) >= currentdate && x.UserId == UserIDs).OrderBy(x => x.StartDate).FirstOrDefault();
 
-            if(c != null) 
+            if (c != null)
             {
-                if (c.StartDate.Value.Date == currentdate) 
+                if (c.StartDate.Value.Date == currentdate)
                 {
                     if (c.EndTime > DateTime.Now.TimeOfDay)
 
@@ -59,9 +60,9 @@ namespace NursingStaffPlanningandSchedulingExcellence.Controllers
                         obj.Enddate = "";
                     }
                 }
-                
+
             }
-            
+
 
             var time = DateTime.Now.AddDays(1);
             var Timer = db.ShiftSchedule.Where(x => DbFunctions.TruncateTime(x.StartDate) >= DbFunctions.TruncateTime(time) && x.UserId == UserIDs).OrderBy(x => x.StartDate).FirstOrDefault();
@@ -100,8 +101,33 @@ namespace NursingStaffPlanningandSchedulingExcellence.Controllers
                     obj.MaritalStatus = task.MaritalStatus?.MaritalStatusName;
 
                 }
+                var nextShiftStart = db.ShiftSchedule.OrderBy(x => x.StartDate).Where(x => x.UserId == UserIDs && (x.StartDate > DateTime.Now || x.StartDate < DateTime.Now && x.EndDate > DateTime.Now)).FirstOrDefault();
+                if (nextShiftStart != null)
+                {
+                    TimeSpan timeUntilNextShift;
+                    if (DateTime.Now < nextShiftStart.StartDate)
+                    {
+                        timeUntilNextShift = nextShiftStart.StartDate.Value - DateTime.Now;
+                        ViewBag.IsCountingDownToShiftStart = true;
+                    }
+                    else if (DateTime.Now < nextShiftStart.EndDate)
+                    {
+                        timeUntilNextShift = nextShiftStart.EndDate.Value - DateTime.Now;
+                        ViewBag.IsCountingDownToShiftStart = false;
+                    }
+                    else
+                    {
+                        timeUntilNextShift = nextShiftStart.StartDate.Value - DateTime.Now;
+                        ViewBag.IsCountingDownToShiftStart = true;
+                    }
+                    ViewBag.CountHours = timeUntilNextShift.Hours;
+                    ViewBag.CountHours += timeUntilNextShift.Days * 24;
+                    ViewBag.CountMinutes = timeUntilNextShift.Minutes;
+                    ViewBag.CountSeconds = timeUntilNextShift.Seconds;
+                }
 
             }
+
             catch (Exception ex)
             {
                 return View("Error");
@@ -138,7 +164,7 @@ namespace NursingStaffPlanningandSchedulingExcellence.Controllers
                     obj.UserRole = task.UserRole;
                     obj.Note = task.Note;
                     obj.Fax = task.Fax;
-   
+
                     obj.GenderName = task.Gender?.GenderName;
                     obj.MaritalStatus = task.MaritalStatus?.MaritalStatusName;
                 }
@@ -166,7 +192,7 @@ namespace NursingStaffPlanningandSchedulingExcellence.Controllers
             {
                 if (sh != null)
                 {
-                    if(sh != userDetails)
+                    if (sh != userDetails)
                     {
                         TempData["DeleteMessage"] = string.Format("User name already in use");
                         return RedirectToAction("SaveStaff");
@@ -174,7 +200,7 @@ namespace NursingStaffPlanningandSchedulingExcellence.Controllers
                 }
             }
             if (objuser.UserId == 0)
-                {
+            {
                 //user.FirstName = objuser.FirstName;
                 //user.LastName = objuser.LastName;
                 //user.DOB = objuser.DOB;
@@ -197,55 +223,106 @@ namespace NursingStaffPlanningandSchedulingExcellence.Controllers
                 return View("Error");
 
             }
-                if (objuser.UserId > 0)
+            if (objuser.UserId > 0)
+            {
+                user = db.User.Where(m => m.UserId == objuser.UserId).FirstOrDefault();
+                if (objuser != null)
                 {
-                    user = db.User.Where(m => m.UserId == objuser.UserId).FirstOrDefault();
-                    if (objuser != null)
-                    {
-                        user.UserName = objuser.UserName;
-                        user.Password = objuser.Password;
-                        user.MaritalStatusId = objuser.MaritalStatusId ?? 0;
-                        user.Address = objuser.Address;
-                        user.City = objuser.City;
-                        user.Province = objuser.Province;
-                        user.ZipCode = objuser.ZipCode;
-                        user.CellPhone = objuser.CellPhone;
-                        user.HomePhone = objuser.HomePhone;
-                        
-                        user.Note = userDetails.Note;
-                        user.Fax = userDetails.Fax;
-                        user.Sex = userDetails.Sex;
-                        user.FirstName = userDetails.FirstName;
-                        user.LastName = userDetails.LastName;
-                        user.DOB = userDetails.DOB;
-                        user.UserRole = 2;
-                        user.Email = userDetails.Email;
-                        user.NurseCertification = userDetails.NurseCertification;
-      
-                        db.Entry(user).State = EntityState.Modified;
-                    }
-                }
-                db.SaveChanges();
+                    user.UserName = objuser.UserName;
+                    user.Password = objuser.Password;
+                    user.MaritalStatusId = objuser.MaritalStatusId ?? 0;
+                    user.Address = objuser.Address;
+                    user.City = objuser.City;
+                    user.Province = objuser.Province;
+                    user.ZipCode = objuser.ZipCode;
+                    user.CellPhone = objuser.CellPhone;
+                    user.HomePhone = objuser.HomePhone;
 
-                TempData["message"] = string.Format("Record updated successfully.");
-                return RedirectToAction("profile", "Staff", new { UserID = UserID });
+                    user.Note = userDetails.Note;
+                    user.Fax = userDetails.Fax;
+                    user.Sex = userDetails.Sex;
+                    user.FirstName = userDetails.FirstName;
+                    user.LastName = userDetails.LastName;
+                    user.DOB = userDetails.DOB;
+                    user.UserRole = 2;
+                    user.Email = userDetails.Email;
+                    user.NurseCertification = userDetails.NurseCertification;
+
+                    db.Entry(user).State = EntityState.Modified;
+                }
             }
+            db.SaveChanges();
+
+            TempData["message"] = string.Format("Record updated successfully.");
+            return RedirectToAction("profile", "Staff", new { UserID = UserID });
+        }
 
         [HttpGet]
         public ActionResult ShiftSchedule(int? year, int? month, int? day, int? chosenYear, int? chosenMonth)
         {
+
             DateTime monthSelected = (chosenYear != null && chosenMonth != null) ? new DateTime(chosenYear.Value, chosenMonth.Value, day != null ? day.Value : DateTime.Now.Day) : DateTime.Now.Date;
             ViewBag.chosenMonth = monthSelected;
 
             DateTime chosenDate = (year != null && month != null && day != null) ? new DateTime(year.Value, month.Value, day.Value) : DateTime.Now.Date;
             ViewBag.chosenDate = chosenDate;
 
+
+
             int UserID = LoginRepository.GetUserID(User.Identity.Name);
+            var now = DateTime.Now.Date;
+            var user = db.User.Where(x => x.UserId == UserID).FirstOrDefault();
+            var oneMonth = DateTime.Now.AddMonths(1) - now;
+
+
+            if (now < user.NurseCertification)
+            {
+                if (user.NurseCertification - now > oneMonth)
+                {
+                    //TempData["Message"] = string.Format("You have Successfully Logged in.");
+                }
+                else
+                {
+                    TempData["DeleteMessage"] = string.Format("Your Nurse Certification is Expiring.");
+                }
+            }
+            else
+            {
+                TempData["DeleteMessage"] = string.Format("Your Nurse Certification has Expired.");
+            }
             ShiftScheduleVM obj = new ShiftScheduleVM();
+
+            var nextShiftStart = db.ShiftSchedule.OrderBy(x => x.StartDate).Where(x => x.UserId == UserID && (x.StartDate > DateTime.Now || x.StartDate < DateTime.Now && x.EndDate > DateTime.Now)).FirstOrDefault();
+            if (nextShiftStart != null)
+            {
+                TimeSpan timeUntilNextShift;
+                if (DateTime.Now < nextShiftStart.StartDate)
+                {
+                    timeUntilNextShift = nextShiftStart.StartDate.Value - DateTime.Now;
+                    obj.IsCountingDownToShiftStart = true;
+                }
+                else if (DateTime.Now < nextShiftStart.EndDate)
+                {
+                    timeUntilNextShift = nextShiftStart.EndDate.Value - DateTime.Now;
+                    obj.IsCountingDownToShiftStart = false;
+                }
+                else
+                {
+                    timeUntilNextShift = nextShiftStart.StartDate.Value - DateTime.Now;
+                    obj.IsCountingDownToShiftStart = true;
+                }
+                obj.CountHours = timeUntilNextShift.Hours;
+                obj.CountHours += timeUntilNextShift.Days * 24;
+                obj.CountMinutes = timeUntilNextShift.Minutes;
+                obj.CountSeconds = timeUntilNextShift.Seconds;
+            }
+
+
             try
             {
                 obj.ShiftScheduleList = db.ShiftSchedule.Where(x => x.UserId == UserID && DbFunctions.TruncateTime(x.StartDate) <= chosenDate.Date && chosenDate.Date <= DbFunctions.TruncateTime(x.EndDate)).ToList();
                 obj.WholeCalendarShifts = db.ShiftSchedule.Where(x => x.UserId == UserID).OrderByDescending(x => x.StartDate).ToList();
+
             }
             catch (Exception ex)
             {

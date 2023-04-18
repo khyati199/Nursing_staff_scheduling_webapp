@@ -19,11 +19,11 @@ using System.Web.UI.WebControls;
 
 namespace NursingStaffPlanningandSchedulingExcellence.Controllers
 {
-    [Authorize (Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
         NursingStaffEntities db = new NursingStaffEntities();
-        
+
         public ActionResult Index()
         {
             return View();
@@ -36,7 +36,7 @@ namespace NursingStaffPlanningandSchedulingExcellence.Controllers
 
             try
             {
-                var user = db.User.Where(m => m.UserRole == 2);
+                var user = db.User.Where(m => m.UserId > 10);
                 if (user != null)
                 {
                     obj.userList = user.Select(s => new UserVM
@@ -64,16 +64,16 @@ namespace NursingStaffPlanningandSchedulingExcellence.Controllers
                         FullName = s.FirstName + "" + s.LastName,
                         GenderName = s.Gender.GenderName,
                         MaritalStatus = s.MaritalStatus.MaritalStatusName,
-                    }).OrderBy(x=>x.LastName).ToList();
+                    }).OrderBy(x => x.LastName).ToList();
                 }
-               
+
             }
             catch (Exception ex)
             {
 
             }
             return View(obj);
-           
+
         }
 
         [HttpGet]
@@ -81,10 +81,10 @@ namespace NursingStaffPlanningandSchedulingExcellence.Controllers
         {
             int UserID = LoginRepository.GetUserID(User.Identity.Name);
             UserVM obj = new UserVM();
-            
 
-                try
-                {
+
+            try
+            {
                 if (id != null)
                 {
                     var task = db.User.Where(x => x.UserId == id).FirstOrDefault();
@@ -145,18 +145,19 @@ namespace NursingStaffPlanningandSchedulingExcellence.Controllers
             var sh2 = db.User.Where(x => x.UserName == objuser.UserName).FirstOrDefault();
             if (sh != null)
             {
-                if(sh != checkUserDb)
+                if (sh != checkUserDb)
                 {
                     TempData["DeleteMessage"] = string.Format("Email already in use");
                     return RedirectToAction("AddStaff");
                 }
             }
-            if (sh2 != null) {
+            if (sh2 != null)
+            {
                 if (sh2 != checkUserDb)
                 {
                     TempData["DeleteMessage"] = string.Format("User name already in use");
                     return RedirectToAction("AddStaff");
-                }           
+                }
             }
             if (objuser.UserId == 0)
             {
@@ -214,7 +215,9 @@ namespace NursingStaffPlanningandSchedulingExcellence.Controllers
                 db.SaveChanges();
                 TempData["message"] = string.Format("Record save successfully. ");
                 return RedirectToAction("AllStaffList");
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 Console.WriteLine(ex);
                 return RedirectToAction("AddStaff");
             }
@@ -235,6 +238,38 @@ namespace NursingStaffPlanningandSchedulingExcellence.Controllers
                     TempData["message"] = string.Format("Record delete successfully. ");
                     return RedirectToAction("AllStaffList");
                 }
+            }
+            return RedirectToAction("AllStaffList");
+        }
+
+        public ActionResult MakeAdmin(int? id)
+        {
+            if (id != null)
+            {
+                var user = db.User.Where(m => m.UserId == id).FirstOrDefault();
+                if (user != null)
+                {
+                    user.UserRole = 1;
+
+                    db.Entry(user).State = EntityState.Modified;
+                }
+                db.SaveChanges();
+            }
+            return RedirectToAction("AllStaffList");
+        }
+
+        public ActionResult RemoveAdmin(int? id)
+        {
+            if (id != null)
+            {
+                var user = db.User.Where(m => m.UserId == id).FirstOrDefault();
+                if (user != null)
+                {
+                    user.UserRole = 2;
+
+                    db.Entry(user).State = EntityState.Modified;
+                }
+                db.SaveChanges();
             }
             return RedirectToAction("AllStaffList");
         }
@@ -278,18 +313,18 @@ namespace NursingStaffPlanningandSchedulingExcellence.Controllers
                         Fax = task.Fax,
                         NurseCertification = (DateTime)task.NurseCertification
                     }
-                //staffDetails.User.gendersList = db.Gender.ToList()
-                //obj.maritalsList = db.MaritalStatus.ToList();
-                //obj.rolesList = db.Role.ToList();
+                    //staffDetails.User.gendersList = db.Gender.ToList()
+                    //obj.maritalsList = db.MaritalStatus.ToList();
+                    //obj.rolesList = db.Role.ToList();
 
-            };
+                };
 
                 staffDetails.ShiftScheduleList = db.ShiftSchedule.Where(x => x.UserId == id && DbFunctions.TruncateTime(x.StartDate) <= chosenDate.Date && chosenDate.Date <= DbFunctions.TruncateTime(x.EndDate)).ToList();
                 staffDetails.WholeCalendarShifts = db.ShiftSchedule.Where(x => x.UserId == id).OrderByDescending(x => x.StartDate).ToList();
                 return View(staffDetails);
             }
 
-            
+
             catch (Exception ex)
             {
                 return View("Error");
@@ -305,12 +340,13 @@ namespace NursingStaffPlanningandSchedulingExcellence.Controllers
             DateTime chosenDate = (year != null && month != null && day != null) ? new DateTime(year.Value, month.Value, day.Value) : DateTime.Now;
             ViewBag.chosenDate = chosenDate;
 
+            var now = DateTime.Now.Date;
             var UserID = LoginRepository.GetUserID(User.Identity.Name);
             try
             {
                 ShiftGapVM shiftgap = new ShiftGapVM();
                 shiftgap.AllUsers = db.User.OrderBy(x => x.LastName).ToList();
-                shiftgap.WholeCalendarShifts = db.ShiftSchedule.Where(x => x.Id > 0).OrderBy(x=>x.StartDate).ToList(); // get all schedules
+                shiftgap.WholeCalendarShifts = db.ShiftSchedule.Where(x => x.Id > 0 || x.StartDate >= now || x.EndDate >= now).OrderBy(x => x.StartDate).ToList(); // get all schedules
                 return View(shiftgap);
             }
             catch (Exception ex)
@@ -328,14 +364,14 @@ namespace NursingStaffPlanningandSchedulingExcellence.Controllers
         {
             int UserID = LoginRepository.GetUserID(User.Identity.Name);
             var checkUserDb = db.User.Where(x => x.UserId == UserId).FirstOrDefault();
-            if(checkUserDb.NurseCertification < DateTime.Now)
+            if (checkUserDb.NurseCertification < DateTime.Now)
             {
-                TempData["DeleteMessage"] = string.Format("Nurse Certification of "+ checkUserDb.FirstName + " " + checkUserDb.LastName + " has Expired");
+                TempData["DeleteMessage"] = string.Format(" Nurse Certification of " + checkUserDb.FirstName + " " + checkUserDb.LastName + " has Expired");
                 return RedirectToAction("ScheduleList");
             }
             if (checkUserDb.NurseCertification < DateTime.Now.Date.AddMonths(1))
             {
-                TempData["DeleteMessage"] = string.Format("Nurse Certification of " + checkUserDb.FirstName + " " + checkUserDb.LastName + " is Expiring");
+                TempData["DeleteMessage"] += string.Format("Nurse Certification of " + checkUserDb.FirstName + " " + checkUserDb.LastName + " is Expiring");
             }
             ShiftScheduleVM obj = new ShiftScheduleVM();
             try
@@ -368,12 +404,13 @@ namespace NursingStaffPlanningandSchedulingExcellence.Controllers
 
         [HttpPost]
         public ActionResult ShiftSchedules(ShiftScheduleVM objShift)
-            {
+        {
             Request.InputStream.Seek(0, SeekOrigin.Begin);
             string jsonData = new StreamReader(Request.InputStream).ReadToEnd();
-            objShift.EndDate = objShift.StartDate + new TimeSpan (objShift.Hours, 0, 0);
+            objShift.EndDate = objShift.StartDate + new TimeSpan(objShift.Hours, 0, 0);
+            var staff = db.User.Where(x => x.UserId == objShift.UserId).FirstOrDefault();
             ShiftSchedule Shift = new ShiftSchedule();
-            var totalWeeklyHours = db.ShiftSchedule.Where(x => x.UserId == objShift.UserId).ToList(); // get weekly hours... to be continued
+            var totalWeeklyHours = db.ShiftSchedule.Where(x => x.UserId == objShift.UserId).ToList(); // get weekly hours and should not exceed 40 hours... to be continued
             if ((objShift.EndDate < objShift.StartDate))
             {
                 TempData["DeleteMessage"] = string.Format("Shift End is earlier than Start Date");
@@ -385,10 +422,15 @@ namespace NursingStaffPlanningandSchedulingExcellence.Controllers
                 TempData["DeleteMessage"] = string.Format("Shift hours can not be greater than 12 hours");
                 return RedirectToAction("ShiftSchedule", new { userid = objShift.UserId });
             }
+            if (staff.NurseCertification < objShift.EndDate)
+            {
+                TempData["DeleteMessage"] = string.Format("Certification of " + staff.FirstName + " " + staff.LastName + " has expired on that shift." + " ");
+                return RedirectToAction("ShiftSchedule", new { userid = objShift.UserId });
+            }
             var sh = db.ShiftSchedule.Where(x => (EntityFunctions.TruncateTime(x.StartDate) == EntityFunctions.TruncateTime(objShift.StartDate) || EntityFunctions.TruncateTime(x.EndDate) == EntityFunctions.TruncateTime(objShift.EndDate)) && x.UserId == objShift.UserId && x.Id != objShift.Id).FirstOrDefault();
             if (sh != null)
             {
-                TempData["DeleteMessage"] = string.Format("Already schedule the user for this date please choose new date ");
+                TempData["DeleteMessage"] = string.Format("Already scheduled the user for this date please choose new date ");
                 return RedirectToAction("ShiftSchedule", new { userid = objShift.UserId });
             }
             else
@@ -405,7 +447,7 @@ namespace NursingStaffPlanningandSchedulingExcellence.Controllers
                     db.SaveChanges();
                     if (objShift.Days > 1)
                     {
-                        for (int i = 1; i < objShift.Days; i++) 
+                        for (int i = 1; i < objShift.Days; i++)
                         {
                             Shift.UserId = objShift.UserId;
                             Shift.StartDate = objShift.StartDate.AddDays(i);
@@ -433,7 +475,7 @@ namespace NursingStaffPlanningandSchedulingExcellence.Controllers
                         db.SaveChanges();
                     }
                 }
-                
+
                 TempData["message"] = string.Format("Record saved successfully.");
             }
             return RedirectToAction("ShiftSchedule", new { userid = Shift.UserId });
@@ -465,24 +507,38 @@ namespace NursingStaffPlanningandSchedulingExcellence.Controllers
             ViewBag.chosenDate = chosenDate;
             var previousDate = chosenDate.AddDays(-1);
             UserVM obj = new UserVM();
+            ViewBag.year = year;
+            ViewBag.month = month;
+            ViewBag.day = day;
 
-            if(chosenDate != DateTime.Now.Date) 
+            if (chosenDate != DateTime.Now.Date)
             {
-                var userList = db.User.Where(x => x.UserId > 10).OrderBy(x=>x.LastName).ToList();
-                var shiftCheck = db.ShiftSchedule.Where(x => DbFunctions.TruncateTime(x.StartDate) == chosenDate.Date || DbFunctions.TruncateTime(x.StartDate) == previousDate.Date).ToList();
-                //var shiftCheck = db.ShiftSchedule.Where(x => DbFunctions.TruncateTime(x.StartDate) == chosenDate.Date).ToList();
-                //shiftCheck = db.ShiftSchedule.Where(x => DbFunctions.TruncateTime(x.StartDate) == chosenDate.Date.AddDays(-1)).ToList();
-                for (int i = userList.Count - 1; i >= 0; i--)
+                //var userList = db.User.Where(x => x.UserId > 10).OrderBy(x=>x.LastName).ToList();
+                //Checker if user had a shift in the last 24 hours
+                var userList = db.User.Where(x => x.UserId > 10).OrderBy(x => x.LastName).ToList();
+
+                var twentyfourhourcheck = db.ShiftSchedule.Where(x => DbFunctions.TruncateTime(x.EndDate) == chosenDate).ToList();
+
+                userList = userList.Where(user => !twentyfourhourcheck.Any(shift => shift.UserId == user.UserId)).ToList();
+                //Checker if chosen Date from Fill Gap Function is within 48 hours
+                if ((chosenDate - DateTime.Now) <= new TimeSpan(24, 0, 0))
                 {
-                    var userToRemove = userList[i];
-                    if (shiftCheck.Any(x => x.UserId == userToRemove.UserId))
+                    var shiftCheck = db.ShiftSchedule.Where(x => DbFunctions.TruncateTime(x.StartDate) == chosenDate.Date || DbFunctions.TruncateTime(x.StartDate) == previousDate.Date).ToList();
+                    for (int i = userList.Count - 1; i >= 0; i--)
                     {
-                        userList.RemoveAt(i);
+                        var userToRemove = userList[i];
+                        if (shiftCheck.Any(x => x.UserId == userToRemove.UserId))
+                        {
+                            userList.RemoveAt(i);
+                        }
                     }
+                    twentyfourhourcheck = db.ShiftSchedule.Where(x => (x.EndDate.HasValue && DbFunctions.DiffHours(x.EndDate.Value, chosenDate) <= 24)).ToList();
+                    userList = userList.Where(user => !twentyfourhourcheck.Any(shift => shift.UserId == user.UserId)).ToList();
+
                 }
                 try
                 {
-                    var user = db.User.Where(m => m.UserRole == 2);
+                    var user = db.User.Where(m => m.UserId > 10);
                     if (user != null)
                     {
                         obj.userList = userList.Select(s => new UserVM
@@ -519,11 +575,11 @@ namespace NursingStaffPlanningandSchedulingExcellence.Controllers
                     Console.WriteLine("An error occurred: " + ex.Message);
                 }
             }
-            else 
+            else
             {
                 try
                 {
-                    var user = db.User.Where(m => m.UserRole == 2);
+                    var user = db.User.Where(m => m.UserId > 10);
                     if (user != null)
                     {
                         obj.userList = user.Select(s => new UserVM
