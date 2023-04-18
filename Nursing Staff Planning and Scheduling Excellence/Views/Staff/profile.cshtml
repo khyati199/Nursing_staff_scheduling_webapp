@@ -5,9 +5,6 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
     var dateCertificationExpiry = DateTime.Now.Date;
     var oneMonth = dateCertificationExpiry.AddMonths(1) - dateCertificationExpiry;
-    var cutime = DateTime.Now;
-    var startdate = @ViewBag.CurrentStartTimer;
-    var Enddate = @ViewBag.Enddate;
 }
 
 <div id="page-wrapper">
@@ -25,30 +22,19 @@
                     <b>@TempData["DeleteMessage"]</b>
                 </div>
             }
-            @if (ViewBag.CurrentStartTimer != null)
-            {
-                <div class="TimerClass">
-                    <h2 class="timess"> Next Shift Remaining Time : </h2>
-                    <div id="timer" class="timess">
-                        <div class="timess" id="days"></div>
-                        <div class="timess" id="hours"></div>
-                        <div class="timess" id="minutes"></div>
-                        <div class="timess" id="seconds"></div>
-                    </div>
-                </div>
-            }
-            else if (ViewBag.Timer != null)
-            {
-                <div class="TimwerClass">
-                    <h2 class="timess"> Next Shift Remaining Time : </h2>
-                    <div id="timer" class="timess">
-                        <div class="timess" id="days"></div>
-                        <div class="timess" id="hours"></div>
-                        <div class="timess" id="minutes"></div>
-                        <div class="timess" id="seconds"></div>
-                    </div>
-                </div>
-            }
+            <div style="display:flex">
+                @if (ViewBag.IsCountingDownToShiftStart == true)
+                {
+                    <h2 id="event-title">Shift Starts in &nbsp;</h2>
+                }
+                else
+                {
+                    <h2 id="event-title">Shift Ends in &nbsp;</h2>
+                }
+
+                <h2 id="timer"> </h2>
+            </div>
+
             <div class="panel panel-info">
                 <div class="panel-heading "> @ViewBag.Title: @Model.FirstName @Model.LastName </div>
                 <div class="white-box">
@@ -243,6 +229,7 @@
         width: 100%;
         text-align: center;
     }
+
     .TimerClass {
         line-height: 58px;
         font-size: 64px;
@@ -283,43 +270,31 @@
 </style>
 
 <script>
-        function makeTimer() {
-            var endTime = Date;
+function startTimer(hours, minutes, seconds) {
+      var eventTitle = document.getElementById('event-title');
+      var timer = document.getElementById('timer');
+    if (hours == 0 && minutes == 0 && seconds == 0) {
+        timer.innerHTML = 'No shift scheduled';
+        return;
+      }
+    timer.innerHTML = ' ' + (hours < 10 ? '0' + hours : hours) + ':' + (minutes < 10 ? '0' + minutes : minutes) + ':' + (seconds < 10 ? '0' + seconds : seconds);
 
 
-            if ('@Model.Enddate' != '') {
-                if ('@ViewBag.CurrentStartTimmer' > '@ViewBag.Enddate') {
-                    endTime = new Date('@ViewBag.Enddate');
-                }
-                else {
-                    endTime = new Date('@ViewBag.Enddate');
-                }
-            }
-            else {
-                 endTime = new Date('@ViewBag.Timer');
-            }
-            endTime = (Date.parse(endTime) / 1000);
+    var secondsLeft = (hours * 3600) + (minutes * 60) + seconds;
 
-            var now = new Date();
-            now = (Date.parse(now) / 1000);
+    setInterval(function() {
+      secondsLeft--;
+      var remainingHours = Math.floor(secondsLeft / 3600);
+      var remainingMinutes = Math.floor((secondsLeft % 3600) / 60);
+      var remainingSeconds = secondsLeft % 60;
+      /*var shiftMessage = shiftStart ? 'Shift Starts: ' : 'Shift ends ';*/
+      timer.innerHTML = ' ' + (remainingHours < 10 ? '0' + remainingHours : remainingHours) + ':' + (remainingMinutes < 10 ? '0' + remainingMinutes : remainingMinutes) + ':' + (remainingSeconds < 10 ? '0' + remainingSeconds : remainingSeconds);
 
-            var timeLeft = endTime - now;
+      if (secondsLeft === 0) {
+        clearInterval(interval);
+      }
+    }, 1000);
+  }
 
-            var days = Math.floor(timeLeft / 86400);
-            var hours = Math.floor((timeLeft - (days * 86400)) / 3600);
-            var minutes = Math.floor((timeLeft - (days * 86400) - (hours * 3600)) / 60);
-            var seconds = Math.floor((timeLeft - (days * 86400) - (hours * 3600) - (minutes * 60)));
-
-            if (hours < "10") { hours = "0" + hours; }
-            if (minutes < "10") { minutes = "0" + minutes; }
-            if (seconds < "10") { seconds = "0" + seconds; }
-
-            $("#days").html(days + "<span>Days</span>");
-            $("#hours").html(hours + "<span>Hours</span>");
-            $("#minutes").html(minutes + "<span>Minutes</span>");
-            $("#seconds").html(seconds + "<span>Seconds</span>");
-
-        }
-
-        setInterval(function () { makeTimer(); }, 1000);
+  startTimer(@ViewBag.CountHours, @ViewBag.CountMinutes, @ViewBag.CountSeconds);
 </script>

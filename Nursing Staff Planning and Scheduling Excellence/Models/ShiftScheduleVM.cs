@@ -28,7 +28,11 @@ namespace NursingStaffPlanningandSchedulingExcellence.Models
         public int Hours { get; set; }
         [DefaultValue(1)]
         public int Days { get; set; }
-
+        public int CountDays { get; set; }
+        public int CountHours { get; set; }
+        public int CountMinutes { get; set; }
+        public int CountSeconds { get; set; }
+        public bool IsCountingDownToShiftStart { get; set; }
         public List<ShiftSchedule> ShiftScheduleList { get; set; }
         public List<ShiftSchedule> WholeCalendarShifts { get; set; }
     }

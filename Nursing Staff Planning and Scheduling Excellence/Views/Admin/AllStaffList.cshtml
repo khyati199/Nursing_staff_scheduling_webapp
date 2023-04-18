@@ -26,6 +26,7 @@
     select#ShiftId {
         height: 32px;
     }
+
     button {
         margin-bottom: 10px;
     }
@@ -54,11 +55,8 @@
 
                         @*<br /><br /><br />*@
                         <table id="example" class="table table-hover contact-list footable-loaded footable m-t-0" data-page-size="4">
-
                             <thead>
-
                                 <tr>
-
                                     <th class="footable-sortable text-center">S.No<span class="footable-sort-indicator"></span></th>
                                     <th class="footable-sortable text-center">Name<span class="footable-sort-indicator"></span></th>
                                     <th class="footable-sortable text-center">Cell Phone<span class="footable-sort-indicator"></span></th>
@@ -80,18 +78,38 @@
                                             <td class="text-center">@(item.Email != null ? item.Email : "N/A")</td>
                                             <td class="text-center">@(item.DOB != null ? string.Format("{0:MMMM d , yyyy}", item.DOB) : "")</td>
                                             <td class="text-center">
-                                                <span class="delete"><a href="~/Admin/StaffDetails/@item.UserId" class="fcbtn btn btn-info btn-outline btn-1f">View</a></span>
-                                                @*<span class="delete"><a href="~/Admin/AddStaff/@item.UserId" class="fcbtn btn btn-info btn-outline btn-1f">Edit</a></span>*@
-                                                <span class="delete"><a href="~/Admin/DeleteStaff/@item.UserId" onclick="return confirm('Are you sure you wish to Delete Staff ?');" class="fcbtn btn btn-danger btn-outline btn-1f">Delete</a></span>
+                                                @if (item.UserRole == 2)
+                                                {
+                                                    <span class="make-admin" style="display:none;">
+                                                        <a href="~/Admin/MakeAdmin/@item.UserId" onclick="return confirm('Are you sure you wish to make @item.FirstName @item.LastName an Administrator?');" class="fcbtn btn btn-danger btn-outline btn-1f">Make Admin</a>
+                                                    </span>
+                                                    <span class="delete"><a href="~/Admin/StaffDetails/@item.UserId" class="fcbtn btn btn-info btn-outline btn-1f">View</a></span>
+                                                    <span class="delete"><a href="~/Admin/DeleteStaff/@item.UserId" onclick="return confirm('Are you sure you wish to Delete Staff?');" class="fcbtn btn btn-danger btn-outline btn-1f">Delete</a></span>
+                                                }
+                                                else if (item.UserRole == 1)
+                                                {
+                                                    <span class="make-admin" style="display:none;">
+                                                        <a href="~/Admin/RemoveAdmin/@item.UserId" onclick="return confirm('Are you sure you wish to remove @item.FirstName @item.LastName as an Administrator?');" class="fcbtn btn btn-danger btn-outline btn-1f">Remove Admin</a>
+                                                    </span>
+                                                    <span class="delete"><a href="~/Admin/StaffDetails/@item.UserId" class="fcbtn btn btn-info btn-outline btn-1f">View</a></span>
+                                                }
+
                                             </td>
                                         </tr>
                                     }
                                 }
                             </tbody>
                             <tfoot>
-                                <tr></tr>
                             </tfoot>
+                            <tbody>
+                                <tr>
+                                    <td colspan="6">
+                                        <a onclick="if(confirm('Are you sure you wish to add an Administrator Staff?')) {var makeAdmins = document.querySelectorAll('.make-admin'); for (var i = 0; i < makeAdmins.length; i++) {makeAdmins[i].style.display = 'inline';}}" class="fcbtn btn btn-danger btn-outline btn-1f">Edit Admin</a>
+                                    </td>
+                                </tr>
+                            </tbody>
                         </table>
+
                     </div>
                 </div>
             </div>
@@ -113,3 +131,8 @@
 
 }
 
+<script>
+    function showAddAdminButton() {
+        document.getElementById('add-admin-button').style.display = 'inline-block';
+    }
+</script>

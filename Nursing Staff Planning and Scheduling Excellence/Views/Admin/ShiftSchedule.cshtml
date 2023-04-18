@@ -115,7 +115,6 @@
                                                 <td class="text-center">@(item.StartDate.Value.ToString("hh:mm tt"))</td>
                                                 <td class="text-center">@(item.EndDate.Value.ToString("hh:mm tt"))</td>
                                                 <td class="text-center">
-                                                    @*<span class="delete"><a href="~/Admin/ShiftSchedule/?id=@item.Id&userid=@item.UserId" class="fcbtn btn btn-info btn-outline btn-1f">Edit</a></span>*@
                                                     <span class="delete"><a href="~/Admin/DeleteShiftSchedule/@item.Id/?userid=@item.UserId" onclick="return confirm('Are you sure you wish to Delete item ?');" class="fcbtn btn btn-danger btn-outline btn-1f">Delete</a></span>
                                                 </td>
                                             </tr>
@@ -159,11 +158,11 @@
     var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
     $('#StartDate').datetimepicker({
         minDate: today,
-        format: 'D/MM/YYYY h:mm A',
+        //format: 'D/MM/YYYY h:mm A',
     });
     $('#EndDate').datetimepicker({
         minDate: today,
-        format: 'D/MM/YYYY h:mm A',
+        //format: 'D/MM/YYYY h:mm A',
     });
 
     jQuery.validator.methods["date"] = function (value, element) { return true; }

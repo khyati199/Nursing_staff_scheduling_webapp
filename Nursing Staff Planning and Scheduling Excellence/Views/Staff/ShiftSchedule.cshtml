@@ -98,6 +98,18 @@
                     <b>@TempData["DeleteMessage"]</b>
                 </div>
             }
+            <div style="display:flex">
+                @if (Model.IsCountingDownToShiftStart == true)
+                {
+                    <h2 id="event-title">Shift Starts in &nbsp;</h2>
+                }
+                else
+                {
+                    <h2 id="event-title">Shift Ends in &nbsp;</h2>
+                }
+
+                <h2 id="timer"> </h2>
+            </div>
             <div class="container">
                 <div class="row">
                     <div class="col">
@@ -125,7 +137,7 @@
                                             {
                                                 foreach (var item in Model.WholeCalendarShifts)
                                                 {
-                                                    if (item.StartDate.Value.Date >= nowDay || item.EndDate.Value.Date == nowDay)
+                                                    if (item.StartDate.Value.Date >= DateTime.Now.Date || item.EndDate.Value.Date == DateTime.Now.Date)
                                                     {
                                                         sno = sno + 1;
                                                         <tr role="row" class="line-content">
@@ -195,13 +207,13 @@
                                                     {
                                                         var hasShift = Model.WholeCalendarShifts.Find(x => x.StartDate.Value.Date == date || x.EndDate.Value.Date == date);
                                                         if (hasShift != null)
-                                {<span><a href="@Url.Action("ShiftSchedule", new { year = now.Year, month = now.Month, day = day, chosenYear = now.Year , chosenMonth = now.Month})">@day</a></span>}
+                                                        {<span><a href="@Url.Action("ShiftSchedule", new { year = now.Year, month = now.Month, day = day, chosenYear = now.Year , chosenMonth = now.Month})">@day</a></span>}
 
-                                                        else
-                                                        {
-                                                            <span class="other-month">@day</span>
-                                                        }
+                                                    else
+                                                    {
+                                                        <span class="other-month">@day</span>
                                                     }
+                                                }
 
                                                 </td>
                                                 if (date.DayOfWeek == DayOfWeek.Saturday)
@@ -274,11 +286,36 @@
     </div>
 </div>
 
+<script>
+  function startTimer(hours, minutes, seconds) {
+      var eventTitle = document.getElementById('event-title');
+      var timer = document.getElementById('timer');
+    if (hours == 0 && minutes == 0 && seconds == 0) {
+        timer.innerHTML = 'No shift scheduled';
+        return;
+      }
+    timer.innerHTML = ' ' + (hours < 10 ? '0' + hours : hours) + ':' + (minutes < 10 ? '0' + minutes : minutes) + ':' + (seconds < 10 ? '0' + seconds : seconds);
+
+
+    var secondsLeft = (hours * 3600) + (minutes * 60) + seconds;
+
+    setInterval(function() {
+      secondsLeft--;
+      var remainingHours = Math.floor(secondsLeft / 3600);
+      var remainingMinutes = Math.floor((secondsLeft % 3600) / 60);
+      var remainingSeconds = secondsLeft % 60;
+
+      timer.innerHTML = ' ' + (remainingHours < 10 ? '0' + remainingHours : remainingHours) + ':' + (remainingMinutes < 10 ? '0' + remainingMinutes : remainingMinutes) + ':' + (remainingSeconds < 10 ? '0' + remainingSeconds : remainingSeconds);
+
+      if (secondsLeft === 0) {
+        clearInterval(interval);
+      }
+    }, 1000);
+  }
+
+  startTimer(@Model.CountHours, @Model.CountMinutes, @Model.CountSeconds);
+</script>
+
 <link href="https://cdn.datatables.net/1.13.3/css/dataTables.bootstrap5.min.css" rel="stylesheet">
 <script src="https://cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.3/js/dataTables.bootstrap5.min.js"></script>
-<script>
-    $(document).ready(function () {
-        $('#example').DataTable({ "pageLength": 10 });
-    });
-</script>
